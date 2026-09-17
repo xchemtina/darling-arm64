@@ -1,0 +1,14 @@
+# Apple-owned assets — never committed
+corpus/
+*.dylib
+*.dyld_shared_cache*
+
+# Build and LaTeX artifacts
+*.aux
+*.log
+*.out
+build/
+
+# Local environment
+.flox/
+.DS_Store

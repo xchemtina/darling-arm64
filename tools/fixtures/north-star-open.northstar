@@ -1,0 +1,2 @@
+#!/bin/sh
+printf 'launchservices-open-passed\n' > /private/var/tmp/north-star-open-marker

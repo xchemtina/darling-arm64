@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Upstream Darling
+    url: https://github.com/darlinghq/darling/issues
+    about: Defects in Darling itself belong upstream. Prove it here with a harness, fix it there, and link both.
+  - name: Read the traps first
+    url: https://github.com/xchemtina/darling-arm64/blob/main/STATE.md
+    about: STATE.md documents traps that each cost real time. Several will otherwise cost you the same hours.

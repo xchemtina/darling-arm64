@@ -1,0 +1,46 @@
+# DARLING-ARM64 FIX for FINDINGS.md F46.
+#
+# Every graphical verifier begins with `apt-get update && apt-get install` for the
+# packages below -- on EVERY run. Two consequences, both measured:
+#
+#   * ~50 s of the ~165 s run is dependency installation;
+#   * a transient DNS failure fails the run in under ten seconds, in a way that
+#     looks exactly like a test failure. Nine runs of a reliability sweep were
+#     invalidated that way, and it nearly produced a false regression report.
+#
+# Baking them in removes the network from the critical path, which matters most for
+# unattended soak runs where nobody is watching to notice a mirror outage.
+#
+# Same shape as Dockerfile.northstar-local: layer on top and retag.
+FROM darling-arm64-dev:latest
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      imagemagick libegl1 libx11-6 libxext6 libxrender1 openbox wmctrl \
+      x11-utils xclip xdotool xserver-xephyr xvfb fonts-dejavu-core \
+      fonts-wqy-zenhei fonts-liberation x11-xserver-utils \
+ && rm -rf /var/lib/apt/lists/*
+
+# DARLING-ARM64 (FINDINGS.md F56): the fonts and x11-xserver-utils were added after
+# `verify-x11-backend` was found to fail 15/15 in 1-3 s -- a failure that had been
+# recorded as a Darling defect and was, in fact, entirely this image's fault. TWO
+# missing dependencies, uncovered one behind the other:
+#
+#   1. FONTS. The smoke application's last two messages before it vanished were
+#          CoreText CJK fallback font selection failed
+#          convertFont:toHaveTrait: failed, San Francisco 2
+#      The staged Darling runtime ships NO fonts of its own (/System/Library/Fonts is
+#      empty), so every font request is served by whatever fontconfig finds here --
+#      which was DejaVu core plus URW base35, with no CJK coverage at all. Adding
+#      fonts-wqy-zenhei and fonts-liberation carried the application from dying in
+#      1-3 s to completing the ready, font, focus, cursor, resize and phase stages.
+#
+#      wqy-zenhei was chosen over fonts-noto-cjk deliberately: ~15 MB against 100 MB+,
+#      and it is sufficient to satisfy the fallback.
+#
+#   2. xrdb, from x11-xserver-utils. With the fonts in place the verifier got as far
+#      as line 320 and died with `xrdb: command not found` (status 127) -- a second
+#      missing dependency that the first one had been hiding.
+#
+# The general lesson, which is F46's lesson again: a test harness that depends on
+# tools it does not declare will attribute its own gaps to the software under test.

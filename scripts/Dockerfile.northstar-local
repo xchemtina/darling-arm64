@@ -1,0 +1,20 @@
+# Derived from deepai-org's darling-aarch64-getting-started image.
+# Two gaps found on a genuinely clean build (FINDINGS.md F14):
+#
+#  1. Their Dockerfile never installs libbsd-dev, yet src/bsdln includes
+#     <bsd/string.h>.
+#  2. Ubuntu/Debian multiarch places both the bsd headers and the Linux kernel
+#     headers under /usr/include/aarch64-linux-gnu/. Those directories are NOT
+#     searched by translation units compiled with -nostdinc and a
+#     -target aarch64-apple-darwin20 triple. Darling's build assumes the
+#     Fedora-style non-multiarch layout, so both need bridging:
+#       bsd/  -> src/bsdln
+#       asm/  -> <linux/types.h> -> <asm/types.h>, hit by
+#                src/frameworks/CoreServices/src/FSEvents/fseventsd.m
+FROM darling-arm64-dev:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libbsd-dev linux-libc-dev \
+ && ln -sfn /usr/include/aarch64-linux-gnu/bsd /usr/include/bsd \
+ && ln -sfn /usr/include/aarch64-linux-gnu/asm /usr/include/asm \
+ && rm -rf /var/lib/apt/lists/*

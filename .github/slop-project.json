@@ -1,0 +1,17 @@
+{
+  "kind": "slop-project-authority",
+  "policyRevision": "2026-09-04.1",
+  "projectId": "darling-arm64",
+  "proposal": "https://github.com/SlopDotCash/slopdotcash/issues/115",
+  "repository": {
+    "fullName": "xchemtina/darling-arm64",
+    "id": "1357775207",
+    "integrationBranch": "main"
+  },
+  "schemaVersion": "1",
+  "steward": {
+    "actorId": "135698468",
+    "login": "xchemtina",
+    "nodeId": "U_kgDOCBaYJA"
+  }
+}
