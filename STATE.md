@@ -6,6 +6,11 @@
 from upstream (see `.claude/.../memory/osxie-quality-red-flags.md`). Nothing from
 Osxie is used here.
 
+> **Not published:** dated entries below refer to `KEVIN-RECORD.md` and `kevin-record/raw/`,
+> an itemised harvest of the upstream arm64 author's repository, which has since gone
+> private. They are deliberately not in this repository. Where a finding cites them, the
+> finding's own evidence stands on its own.
+
 ## Why this machine
 
 Darling is a *translation layer*, not a CPU emulator — host arch must match binary

@@ -1,5 +1,11 @@
 # THOUGHTS — open questions, live hypotheses, and what this week taught
 
+> **Update 2026-09-17.** "The blocker is one symbol family" was true and is now explained:
+> F107 finds those descriptors inside Apple's AppKit binary (`libswiftAppKit` is an empty
+> re-export stub), and binding the shared-cache AppKit makes the probe pass. F110 takes the
+> same flag to CotEditor. Read those before the reflections below, which are kept as written.
+
+
 Speculative by design. Nothing here is a claim; claims live in `FINDINGS.md`.
 
 ---

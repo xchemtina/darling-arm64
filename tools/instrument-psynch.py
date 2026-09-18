@@ -3,7 +3,7 @@
 # kw_intr stranded-grant lost-wake mechanism. NO semantic change: only dtape_log_error
 # calls. Applied to kern_synch.c inside the VM. Reversible via instrument-psynch.py --revert.
 import sys, re, pathlib
-F = pathlib.Path("/home/crischimiadao.guest/darling/source/src/external/darlingserver/duct-tape/pthread/kern_synch.c")
+F = pathlib.Path.home() / "darling/source/src/external/darlingserver/duct-tape/pthread/kern_synch.c"
 MARK = "PSYNCH_INSTR"
 src = F.read_text()
 

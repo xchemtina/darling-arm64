@@ -32,9 +32,13 @@ With the shared-cache AppKit bound instead (`ITERM2_PROBE_PREFER_DISK_FRAMEWORKS
 probe prints `SWIFT_APPKIT_ATTR_OK 1`, byte-identical to native, A/B/A over that one flag.
 
 The open question is what a real GUI application does on Apple's AppKit, which needs
-surfaces Darling does not provide. `tools/f110-coteditor-apple-appkit.sh` is the A/B/A that
-asks; `FINDINGS.md` F110 records what it found. Take it from there: name the first thing
-Apple's AppKit needs that Darling lacks, with the harness that shows it.
+surfaces Darling does not provide. `tools/f110-coteditor-apple-appkit.sh` asked: with
+Apple's AppKit the symbol resolves and CotEditor dies with a startup `SIGSEGV` inside the
+shared cache (F110). Leading suspect: the duplicate classes between Apple's AppKit and
+`libDarlingAppKitBootstrap`. `tools/f111-coteditor-no-bootstrap.sh` tries the shim off, but
+the probe engine currently refuses that flag combination (exit 2) — making that arm runnable
+without editing the upstream probe is the first concrete task; symbolicating the fault
+(`atos` against the VM's cache) is the second.
 
 **Do not** patch Darling's AppKit blindly to chase the symbols. F107 says why they are
 missing; the work is deciding which AppKit a Swift application should bind, not shimming

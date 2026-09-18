@@ -4,7 +4,7 @@
 # have suspend() reschedule itself. Host-side only (thread.hpp + thread.cpp), does NOT
 # touch shared Apple kern_synch.c. Reversible with --revert.
 import sys, pathlib
-BASE = pathlib.Path("/home/crischimiadao.guest/darling/source/src/external/darlingserver")
+BASE = pathlib.Path.home() / "darling/source/src/external/darlingserver"
 HPP = BASE / "internal-include/darlingserver/thread.hpp"
 CPP = BASE / "src/thread.cpp"
 TAG = "F100 latch"

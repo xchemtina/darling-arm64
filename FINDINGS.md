@@ -6209,3 +6209,77 @@ recorded ~100%); the driver's added lines run only after the gate has returned.
 
 **Cost:** 30 minutes and two gate runs. **Pays for itself the first time** — NEXT_STEPS
 item 4 (the residual failure modes on the real runtime) was blocked on exactly this.
+
+## F109 — the F102 zero-build discriminator is confounded on the iTerm2 workload: with the thread bridge off, mode-B cores vanish *and* iTerm2 never launches 🟠
+
+**Design.** `tools/f109-thread-bridge-discriminator.sh 2 viability` — A/B/A over **one**
+variable, `DARLING_ARM64_THREAD_BRIDGE` (1 → 0 → 1), flipped at all **eight** sites
+(`probe-iterm2-launch-arm64.sh:463` plus the seven generated launchd plists) in a
+temporary copy of the probe, called by a temporary copy of the gate; Kevin's files
+untouched. The driver counts the sites after each flip and refuses to run a contaminated
+arm (F102's trap: flip them separately and you measure the mismatch). Cores captured into
+the artifact directory (`--ulimit core=-1`, `core_pattern` → `/artifacts`). n = 2 per arm,
+`install-arm64-f103` root, no debug amplifier.
+
+| arm | bridge | gate | cores (`core.mldr.*`) | note |
+|---|---|---|---|---|
+| A1 | 1 | 2/2 pass | **2, 4** (pids 9, 21; 1, 9, 21, 23) | cores in *passing* runs |
+| B | 0 | **0/2** — `silver-tab1-pid.txt` missing | **0** | no `iterm2-job.*` at all: `darlingserver … Killed`, mldr 84 asleep as `/sbin/launchd` |
+| A2 | 1 | 2/2 pass | **3, 0** | as A1 |
+
+**What it shows.** F102 predicted "no broker ⇒ mode B must disappear entirely", and the
+cores do disappear (9 → 0 across the flip, back to 3 on restore). But the reason is not
+discriminating: with the bridge off, the Darwin bootstrap under the probe never gets as
+far as launching iTerm2 — no first tab shell, no `iterm2-job.out/err`, `darlingserver`
+killed. Kevin's record says exactly this (`DARLING_ARM64_THREAD_BRIDGE=1` is "required for
+any pthread behavior" and regresses fork paths; the two are never combined safely). So
+`=0` removes the mechanism by removing the workload. **Negative result, cleanly:** the
+flag is not a usable discriminator for mode B on a threaded GUI application. A
+discriminator has to keep the broker out of *signal delivery* (the fix's shape, F102) rather
+than out of existence.
+
+**Corroboration for free.** Passing runs at bridge=1 still dump `core.mldr.*` — 2, 4, 3
+per run — with the gate green. That is F102's "bonus": the same defect fires on
+already-exec'd shells at teardown (`SIGHUP`), invisible to the gate's verdict. It is
+general, it is frequent, and it is now cheap to see because F108 keeps the artifacts.
+
+**Cost:** ~3.5 minutes of VM time. `tools/f109-thread-bridge-discriminator.sh`.
+
+## F110 — CotEditor 7.0.7 on Apple's AppKit: the Stage-20 symbol resolves, then the process dies with `SIGSEGV` inside the shared cache 🟠
+
+The F107 flip taken to a real GUI application. `tools/f110-coteditor-apple-appkit.sh aba`
+— the F104 CotEditor launch driver verbatim, A/B/A over **one** variable,
+`ITERM2_PROBE_PREFER_DISK_FRAMEWORKS` (1 = Darling's AppKit, F104's condition; 0 = Apple's
+AppKit from the shared cache). One attempt per arm; ~50 s each; cores captured.
+
+| arm | flag | `iterm2-job.out` (CotEditor's own stdout) | CotEditor procs / windows |
+|---|---|---|---|
+| A1 | 1 | `abort_with_payload: reason: Symbol not found: _$s10Foundation15AttributeScopesO6AppKitE0dE10AttributesV015BackgroundColorB0OMn … Expected in: flat namespace; code: 4` | 0 / 19 × 1×1 |
+| **B** | **0** | **`unhandled ARM64 SIGSEGV pc=0x18008FC00 lr=0x18008FABC caller_lr=0x18008DD90 address=0x1031ED388`** — no `Symbol not found` anywhere | 0 / 19 × 1×1 |
+| A2 | 1 | same `Symbol not found` as A1 | 0 / 19 × 1×1 |
+
+The four `core.mldr.{9,13,15,21}` per arm are identical across arms and belong to the
+bootstrap's launchd children, not to CotEditor — the CotEditor verdict is its own stdout.
+
+**What this settles.** With Apple's AppKit bound, the symbol family that has blocked Stage
+20 since F104 (`BackgroundColor` for 7.0.7, `ParagraphStyle` for 4.5.5, `ForegroundColor`
+in the probe) **resolves**. CotEditor gets further than it ever has on arm64 and then
+faults during startup at `pc=0x18008FC00`. That address sits in the shared-cache range
+where F108's id26 backtrace places `libobjc.A.dylib` (`objc_exception_throw` at
+`0x1800a691c`), so the fault is very probably in the Objective-C runtime; not symbolicated
+— `dyld_info -exports` on the host's `libobjc` returns re-export stubs, and nobody has run
+`atos` against the VM's cache yet.
+
+**Leading hypothesis, one variable away.** F107's B arm already logged the first cost of
+this configuration: `NSImageSymbolConfiguration`, `NSSearchToolbarItem`,
+`NSFilePromiseReceiver`, `NSTouch` are "implemented in both `AppKit` and
+`/usr/lib/libDarlingAppKitBootstrap.dylib` … may cause spurious casting failures and
+mysterious crashes". That dylib is Kevin's shim supplying symbols Darling's AppKit lacks; on
+Apple's AppKit it is redundant and collides. `tools/f111-coteditor-no-bootstrap.sh` asks
+whether the shim is the crash: same arm B versus arm C with `ITERM2_PROBE_APPKIT_BOOTSTRAP=0`.
+
+**What this does not say.** Nothing here shows a window. The claim is bounded: the
+*symbol* blocker is a framework-selection outcome (F107), and the next blocker on Apple's
+AppKit is a startup `SIGSEGV`, not a missing runtime.
+
+**Cost:** ~3 minutes of VM time. `tools/f110-coteditor-apple-appkit.sh`.

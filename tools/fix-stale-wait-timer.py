@@ -7,7 +7,7 @@
 # libdispatch's untimed reply receive -> DISPATCH_INTERNAL_CRASH brk -> iTerm2 dies:
 # the session-spawn flake). Exact-string apply/revert.
 import sys, pathlib
-F = pathlib.Path("/home/crischimiadao.guest/darling/source/src/external/darlingserver/duct-tape/src/thread.c")
+F = pathlib.Path.home() / "darling/source/src/external/darlingserver/duct-tape/src/thread.c"
 TAG = "F101 stale wait timer"
 
 anchor = """// thread locked

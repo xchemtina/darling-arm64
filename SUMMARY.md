@@ -1,6 +1,6 @@
 # SUMMARY — where arm64 Darling stands (2026-09-17)
 
-One page. Everything here traces to `FINDINGS.md` (F1–F108) on
+One page. Everything here traces to `FINDINGS.md` (F1–F110) on
 `deepai-org/darling-aarch64-north-star` → `north-star/arm64-verified-fixes` @ `aae7ac5e9`.
 
 ## The headline
@@ -51,7 +51,10 @@ flipped. It gates Stage 20, which gates Gold.
 
 ## What is honestly still open
 
-- **F110** — CotEditor on Apple's AppKit: result pending at the time of writing.
+- **F110** — on Apple's AppKit the Stage-20 symbol resolves and CotEditor dies with a
+  startup `SIGSEGV` at `pc=0x18008FC00` (libobjc's range, unsymbolicated). Leading
+  suspect: the duplicate classes between Apple's AppKit and `libDarlingAppKitBootstrap`;
+  the shim-off arm (F111) has not run yet — the probe refuses that flag combination.
 - **The 26.5-identity root's 100% failure is now named** — the first artifact F108 ever
   preserved shows `-[NSButton setHasDestructiveAction:]: unrecognized selector` from
   `-[iTermWarning makeAlert]`, a macOS 11 API Darling's AppKit lacks, reached because
@@ -77,4 +80,4 @@ after it shipped, and each correction is in the record.
 
 See `README.md` (orientation), `ARCHITECTURE.md` (how it fits together),
 `NEXT_STEPS.md` (ordered queue), `DECISIONS.md` (why), `THOUGHTS.md` (open questions),
-`STATE.md` §Traps (55 traps that cost real time).
+`STATE.md` §Traps (traps that each cost real time).

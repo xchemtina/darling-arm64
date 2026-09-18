@@ -20,7 +20,7 @@ falsify any number in it.
 | Stage 19 — iTerm2 Silver (tabs / splits / persistence) | **pass, ~82%** | 41/50 on a faithful stage-18 copy |
 | Swift core + Foundation on arm64 | **pass** | byte-identical to native ground truth (F106) |
 | Swift ↔ AppKit interop | **pass with Apple's AppKit; fail with Darling's** | `SWIFT_APPKIT_ATTR_OK 1` when the shared-cache AppKit is bound, A/B/A over one flag (F107) |
-| Stage 20 — CotEditor Bronze | **blocked** | neither pinned version launches on Darling's AppKit (F104); F107 names why and F110 tests the alternative |
+| Stage 20 — CotEditor Bronze | **blocked, one rung further** | on Darling's AppKit: `Symbol not found` (F104); on Apple's AppKit the symbol resolves and CotEditor dies with a startup `SIGSEGV` in the shared cache (F110) |
 
 A real macOS application runs on arm64 Darling, and Swift works. The Swift↔AppKit
 descriptors live inside Apple's AppKit binary (F107); the open question is what a GUI
