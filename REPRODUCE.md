@@ -32,7 +32,7 @@ tools/reproduce.sh            # ladder + Silver tabs + leak-ABA short cycle, pas
 | **the 26.5/12.4 identity fork** (F93/F96) | `tools/f95-identity-26.sh` | 26.5 dies at `setHasDestructiveAction:` |
 | **setAlphaValue fix restores launch** (F97) | `tools/f97-alphavalue-fix.sh` | merged tail launches again |
 | the session-spawn flake, first captured (F98) | `tools/f98-session-spawn.sh` | pass/fail capture pair (framing superseded by F100) |
-| **the flake: on-demand repro** (F100) | `tools/f100-gate-aba.sh <N> <label>` | `DSERVER_LOG_LEVEL=debug` amplifies it to ~93%; rate + Wilson CI |
+| **the flake: on-demand repro** (F100) | `tools/f100-gate-aba.sh <N> <label>` | rate + Wilson CI; the debug-amplifier figure this cell once cited was formally retracted (F102's correction) — see `FINDINGS.md` |
 | **the three ruled-out mechanisms** (F100) | `tools/instrument-psynch.py` + `tools/f100-instr-batch.sh`; `tools/fix-resume-latch.py` + `tools/f100-gate-aba.sh`; rebuild via `tools/f100-build-id26.sh` | instrument → 0 mints; latch A/B/A 93%→93%; single-threaded config proof |
 | cold-host: no path completes (F94) | `tools/f91-cold-host.sh` | the 8-layer clone/build ledger |
 
